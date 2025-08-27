@@ -251,7 +251,7 @@ class _HomePageState extends State<HomePage> {
                 opacity: _opacity,
                 fontSize: _fontSize,
                 fontWeight: _fontWeight,
-                duration: _duration,
+                duration: _duration.toDouble(),
                 showStroke: _showStroke,
                 massiveMode: _massiveMode,
                 hideScroll: _hideScroll,
@@ -306,8 +306,8 @@ class _HomePageState extends State<HomePage> {
                   setState(() {
                     _duration = e.toInt();
                   });
-                  _controller.updateOption(
-                      _controller.option.copyWith(duration: e.toInt()));
+                  _controller
+                      .updateOption(_controller.option.copyWith(duration: e));
                 },
               ),
               SwitchListTile(

@@ -14,10 +14,14 @@ class DanmakuScreen extends StatefulWidget {
   // 创建Screen后返回控制器
   final Function(DanmakuController) createdController;
   final DanmakuOption option;
+  final bool useOutsideTick;
+  final int? outsideTick;
 
   const DanmakuScreen({
     required this.createdController,
     required this.option,
+    this.useOutsideTick = false,
+    this.outsideTick,
     super.key,
   });
 
@@ -60,15 +64,19 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   /// 弹幕轨道数
   late int _trackCount;
 
+  int? _outsideTick;
+
   /// 弹幕轨道位置
   final List<double> _trackYPositions = [];
 
   late final _random = Random();
 
   /// 内部计时器
-  int get _tick => _stopwatch.elapsedMilliseconds;
+  int get _tick => widget.useOutsideTick
+      ? (_outsideTick ?? 0)
+      : (_stopwatch?.elapsedMilliseconds ?? 0);
 
-  final _stopwatch = Stopwatch();
+  Stopwatch? _stopwatch;
 
   /// 运行状态
   bool _running = true;
@@ -77,7 +85,10 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   void initState() {
     super.initState();
     // 计时器初始化
-    _startTick();
+    if (!widget.useOutsideTick) {
+      _stopwatch = Stopwatch();
+      _startTick();
+    }
     _option = widget.option;
     _controller = DanmakuController(
       onAddDanmaku: addDanmaku,
@@ -85,6 +96,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       onPause: pause,
       onResume: resume,
       onClear: clearDanmakus,
+      onUpdateOutsideTick: updateOutsideTick,
     );
     _controller.option = _option;
     widget.createdController.call(
@@ -93,12 +105,12 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: _option.duration),
+      duration: Duration(milliseconds: (_option.duration * 1000).toInt()),
     )..repeat();
 
     _staticAnimationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: _option.duration),
+      duration: Duration(milliseconds: (_option.duration * 1000).toInt()),
     );
 
     WidgetsBinding.instance.addObserver(this);
@@ -118,7 +130,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
     _staticAnimationController.dispose();
-    _stopwatch.stop();
+    _stopwatch?.stop();
     super.dispose();
   }
 
@@ -299,8 +311,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       if (_animationController.isAnimating) {
         _animationController.stop();
       }
-      if (_stopwatch.isRunning) {
-        _stopwatch.stop();
+      if (_stopwatch != null && _stopwatch!.isRunning) {
+        _stopwatch!.stop();
       }
     }
   }
@@ -314,8 +326,10 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       });
       if (!_animationController.isAnimating) {
         _animationController.repeat();
-        // 重启计时器
-        _startTick();
+        if (!widget.useOutsideTick && _stopwatch != null) {
+          // 重启计时器
+          _startTick();
+        }
       }
     }
   }
@@ -435,8 +449,21 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   // 基于Stopwatch的计时器同步
   void _startTick() async {
     // _stopwatch.reset();
-    _stopwatch.start();
+    _stopwatch?.start();
 
+    await _removeExpiredDanmakus();
+
+    _stopwatch?.stop();
+  }
+
+  /// 更新外部传入的时间
+  void updateOutsideTick(int tick) {
+    _outsideTick = tick;
+    _removeExpiredDanmakus();
+    // setState(() {});
+  }
+
+  Future<void> _removeExpiredDanmakus() async {
     final staticDuration = _option.duration * 1000;
 
     while (_running && mounted) {
@@ -468,8 +495,6 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         });
       }
     }
-
-    _stopwatch.stop();
   }
 
   @override

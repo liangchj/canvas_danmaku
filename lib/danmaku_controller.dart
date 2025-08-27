@@ -7,12 +7,14 @@ class DanmakuController {
   final Function onPause;
   final Function onResume;
   final Function onClear;
+  final Function onUpdateOutsideTick;
   DanmakuController({
     required this.onAddDanmaku,
     required this.onUpdateOption,
     required this.onPause,
     required this.onResume,
     required this.onClear,
+    required this.onUpdateOutsideTick,
   });
 
   bool _running = true;
@@ -53,5 +55,10 @@ class DanmakuController {
   /// 更新弹幕配置
   void updateOption(DanmakuOption option) {
     onUpdateOption.call(option);
+  }
+
+  /// 更新外部传入的时间
+  void updateOutsideTick(int tick) {
+    onUpdateOutsideTick.call(tick);
   }
 }
