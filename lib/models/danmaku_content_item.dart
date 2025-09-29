@@ -15,12 +15,34 @@ class DanmakuContentItem {
   /// 弹幕类型
   final DanmakuItemType type;
 
+  /// 弹幕时间
+  final int? time;
+
   /// 是否为自己发送
   final bool selfSend;
-  DanmakuContentItem(this.text,
-      {this.color = Colors.white,
-      this.type = DanmakuItemType.scroll,
-      this.selfSend = false});
+
+  DanmakuContentItem(
+    this.text, {
+    this.time,
+    this.color = Colors.white,
+    this.type = DanmakuItemType.scroll,
+    this.selfSend = false,
+  });
+
+  DanmakuContentItem copyWith({
+    String? text,
+    int? time,
+    Color? color,
+    DanmakuItemType? type,
+    bool? selfSend,
+  }) =>
+      DanmakuContentItem(
+        text ?? this.text,
+        time: time ?? this.time,
+        color: color ?? this.color,
+        type: type ?? this.type,
+        selfSend: selfSend ?? this.selfSend,
+      );
 }
 
 class SpecialDanmakuContentItem extends DanmakuContentItem {
@@ -49,6 +71,7 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
 
   SpecialDanmakuContentItem(
     super.text, {
+    super.time,
     required this.duration,
     required super.color,
     required this.fontSize,
@@ -61,12 +84,47 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
     int? translationDuration,
     this.translationStartDelay = 0,
     this.easingType = Curves.linear,
-  }) : this.translationDuration = translationDuration ?? duration;
+  }) : translationDuration = translationDuration ?? duration;
+
+  SpecialDanmakuContentItem specialCopyWith({
+    String? text,
+    int? time,
+    Color? color,
+    double? fontSize,
+    bool? hasStroke,
+    Tween<double>? alphaTween,
+    Tween<double>? translateXTween,
+    Tween<double>? translateYTween,
+    int? duration,
+    int? translationDuration,
+    int? translationStartDelay,
+    Matrix4? matrix,
+    PathMetric? motionPathMetric,
+    Curve? easingType,
+  }) =>
+      SpecialDanmakuContentItem(
+        text ?? this.text,
+        time: time ?? this.time,
+        duration: duration ?? this.duration,
+        color: color ?? this.color,
+        fontSize: fontSize ?? this.fontSize,
+        hasStroke: hasStroke ?? this.hasStroke,
+        translateXTween: translateXTween ?? this.translateXTween,
+        translateYTween: translateYTween ?? this.translateYTween,
+        alphaTween: alphaTween ?? this.alphaTween,
+        matrix: matrix ?? this.matrix,
+        motionPathMetric: motionPathMetric ?? this.motionPathMetric,
+        translationDuration: translationDuration ?? this.translationDuration,
+        translationStartDelay:
+            translationStartDelay ?? this.translationStartDelay,
+        easingType: easingType ?? this.easingType,
+      );
 
   factory SpecialDanmakuContentItem.fromList(
     Color color,
     double fontSize,
     List list, {
+    int? time,
     double videoX = 1920,
     double videoY = 1080,
     bool disableGradient = false,
@@ -107,6 +165,7 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
     // }
     return SpecialDanmakuContentItem(
       text,
+      time: time,
       duration: duration,
       color: color,
       fontSize: fontSize,
@@ -155,14 +214,14 @@ class SpecialDanmakuContentItem extends DanmakuContentItem {
         int() => digit,
         double() => digit.toInt(),
         String() => int.tryParse(digit) ?? 0,
-        _ => throw UnimplementedError()
+        _ => throw UnimplementedError(),
       };
 
   static double _parseDouble(dynamic digit) => switch (digit) {
         int() => digit.toDouble(),
         double() => digit,
         String() => double.tryParse(digit) ?? 0,
-        _ => throw UnimplementedError()
+        _ => throw UnimplementedError(),
       };
 
   static Tween<T> _makeTween<T>(T start, T end) {

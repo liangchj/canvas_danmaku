@@ -22,17 +22,17 @@ class ScrollDanmakuPainter extends CustomPainter {
     ..color = Colors.green;
 
   ScrollDanmakuPainter(
-    this.progress,
-    this.scrollDanmakuItems,
-    this.danmakuDurationInSeconds,
-    this.fontSize,
-    this.fontWeight,
-    this.showStroke,
-    this.danmakuHeight,
-    this.running,
-    this.tick, {
-    this.batchThreshold = 10, // 默认值为10，可以自行调整
-  }) : totalDuration = danmakuDurationInSeconds * 1000;
+      this.progress,
+      this.scrollDanmakuItems,
+      this.danmakuDurationInSeconds,
+      this.fontSize,
+      this.fontWeight,
+      this.showStroke,
+      this.danmakuHeight,
+      this.running,
+      this.tick, {
+        this.batchThreshold = 10, // 默认值为10，可以自行调整
+      }) : totalDuration = danmakuDurationInSeconds * 1000;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -44,36 +44,48 @@ class ScrollDanmakuPainter extends CustomPainter {
       final Canvas pictureCanvas = Canvas(pictureRecorder);
 
       for (var item in scrollDanmakuItems) {
-        item.lastDrawTick ??= item.creationTime;
+        if (item.content.time == null) continue;
         final endPosition = -item.width;
         final distance = startPosition - endPosition;
-        item.xPosition = item.xPosition +
-            (((item.lastDrawTick! - tick) / totalDuration) * distance);
+        item.xPosition = size.width -
+            (((tick - item.content.time!) / totalDuration) * distance);
 
         if (item.xPosition < -item.width || item.xPosition > size.width) {
           continue;
         }
 
         item.paragraph ??= Utils.generateParagraph(
-            item.content, size.width, fontSize, fontWeight);
+          item.content,
+          size.width,
+          fontSize,
+          fontWeight,
+        );
 
         if (showStroke) {
           item.strokeParagraph ??= Utils.generateStrokeParagraph(
-              item.content, size.width, fontSize, fontWeight);
+            item.content,
+            size.width,
+            fontSize,
+            fontWeight,
+          );
           pictureCanvas.drawParagraph(
-              item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
+            item.strokeParagraph!,
+            Offset(item.xPosition, item.yPosition),
+          );
         }
 
         if (item.content.selfSend) {
           pictureCanvas.drawRect(
-              Offset(item.xPosition, item.yPosition).translate(-2, 2) &
-                  (Size(item.width, item.height) + const Offset(4, 0)),
-              selfSendPaint);
+            Offset(item.xPosition, item.yPosition).translate(-2, 2) &
+            (Size(item.width, item.height) + const Offset(4, 0)),
+            selfSendPaint,
+          );
         }
 
         pictureCanvas.drawParagraph(
-            item.paragraph!, Offset(item.xPosition, item.yPosition));
-        item.lastDrawTick = tick;
+          item.paragraph!,
+          Offset(item.xPosition, item.yPosition),
+        );
       }
 
       final ui.Picture picture = pictureRecorder.endRecording();
@@ -81,36 +93,48 @@ class ScrollDanmakuPainter extends CustomPainter {
     } else {
       // 弹幕数量较少时直接绘制 (节约创建 canvas 的开销)
       for (var item in scrollDanmakuItems) {
-        item.lastDrawTick ??= item.creationTime;
+        if (item.content.time == null) continue;
         final endPosition = -item.width;
         final distance = startPosition - endPosition;
-        item.xPosition = item.xPosition +
-            (((item.lastDrawTick! - tick) / totalDuration) * distance);
+        item.xPosition = size.width -
+            (((tick - item.content.time!) / totalDuration) * distance);
 
         if (item.xPosition < -item.width || item.xPosition > size.width) {
           continue;
         }
 
         item.paragraph ??= Utils.generateParagraph(
-            item.content, size.width, fontSize, fontWeight);
+          item.content,
+          size.width,
+          fontSize,
+          fontWeight,
+        );
 
         if (showStroke) {
           item.strokeParagraph ??= Utils.generateStrokeParagraph(
-              item.content, size.width, fontSize, fontWeight);
+            item.content,
+            size.width,
+            fontSize,
+            fontWeight,
+          );
           canvas.drawParagraph(
-              item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
+            item.strokeParagraph!,
+            Offset(item.xPosition, item.yPosition),
+          );
         }
 
         if (item.content.selfSend) {
           canvas.drawRect(
-              Offset(item.xPosition, item.yPosition).translate(-2, 2) &
-                  (Size(item.width, item.height) + const Offset(4, 0)),
-              selfSendPaint);
+            Offset(item.xPosition, item.yPosition).translate(-2, 2) &
+            (Size(item.width, item.height) + const Offset(4, 0)),
+            selfSendPaint,
+          );
         }
 
         canvas.drawParagraph(
-            item.paragraph!, Offset(item.xPosition, item.yPosition));
-        item.lastDrawTick = tick;
+          item.paragraph!,
+          Offset(item.xPosition, item.yPosition),
+        );
       }
     }
   }

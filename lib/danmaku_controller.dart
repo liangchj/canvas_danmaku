@@ -4,17 +4,23 @@ import '/models/danmaku_content_item.dart';
 class DanmakuController {
   final Function(DanmakuContentItem) onAddDanmaku;
   final Function(DanmakuOption) onUpdateOption;
+  final Function(int) onStart;
   final Function onPause;
   final Function onResume;
   final Function onClear;
-  final Function onUpdateOutsideTick;
+  final Function onUpdateStartTime;
+  final Function onTime;
+  final Function(bool) onReset;
   DanmakuController({
     required this.onAddDanmaku,
     required this.onUpdateOption,
+    required this.onStart,
     required this.onPause,
     required this.onResume,
     required this.onClear,
-    required this.onUpdateOutsideTick,
+    required this.onUpdateStartTime,
+    required this.onTime,
+    required this.onReset,
   });
 
   bool _running = true;
@@ -30,6 +36,11 @@ class DanmakuController {
   DanmakuOption get option => _option;
   set option(e) {
     _option = e;
+  }
+
+  /// 启动弹幕
+  void start(int time) {
+    onStart.call(time);
   }
 
   /// 暂停弹幕
@@ -57,8 +68,17 @@ class DanmakuController {
     onUpdateOption.call(option);
   }
 
-  /// 更新外部传入的时间
-  void updateOutsideTick(int tick) {
-    onUpdateOutsideTick.call(tick);
+  /// 更新启动时间
+  void updateStartTime(int time) {
+    onUpdateStartTime.call(time);
+  }
+
+  int get time {
+    return onTime.call();
+  }
+
+  /// 重置
+  void reset({bool stop = true}) {
+    onReset.call(stop);
   }
 }

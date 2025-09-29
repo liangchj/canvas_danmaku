@@ -34,6 +34,15 @@ class DanmakuOption {
   /// 为字幕预留空间
   final bool safeArea;
 
+  /// 间隔显示弹幕时间（毫秒）
+  final int intervalTime;
+
+  /// 调整弹幕时间（毫秒）
+  final int adjustMillisecond;
+
+  /// 自定义弹幕发送延迟（毫秒）
+  final int selfSendDelayMillisecond;
+
   DanmakuOption({
     this.fontSize = 16,
     this.fontWeight = 4,
@@ -47,6 +56,9 @@ class DanmakuOption {
     this.showStroke = true,
     this.massiveMode = false,
     this.safeArea = true,
+    this.intervalTime = 500,
+    this.adjustMillisecond = 0,
+    this.selfSendDelayMillisecond = 1000,
   });
 
   DanmakuOption copyWith({
@@ -61,6 +73,8 @@ class DanmakuOption {
     bool? showStroke,
     bool? massiveMode,
     bool? safeArea,
+    int? intervalTime,
+    int? adjustMillisecond,
   }) {
     return DanmakuOption(
       area: area ?? this.area,
@@ -74,6 +88,8 @@ class DanmakuOption {
       showStroke: showStroke ?? this.showStroke,
       massiveMode: massiveMode ?? this.massiveMode,
       safeArea: safeArea ?? this.safeArea,
+      intervalTime: intervalTime ?? this.intervalTime,
+      adjustMillisecond: adjustMillisecond ?? this.adjustMillisecond,
     );
   }
 }

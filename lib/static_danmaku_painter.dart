@@ -5,7 +5,7 @@ import '/utils/utils.dart';
 class StaticDanmakuPainter extends CustomPainter {
   final double progress;
   final List<DanmakuItem> topDanmakuItems;
-  final List<DanmakuItem> buttomDanmakuItems;
+  final List<DanmakuItem> bottomDanmakuItems;
   final double danmakuDurationInSeconds;
   final double fontSize;
   final int fontWeight;
@@ -21,14 +21,15 @@ class StaticDanmakuPainter extends CustomPainter {
   StaticDanmakuPainter(
       this.progress,
       this.topDanmakuItems,
-      this.buttomDanmakuItems,
+      this.bottomDanmakuItems,
       this.danmakuDurationInSeconds,
       this.fontSize,
       this.fontWeight,
       this.showStroke,
       this.danmakuHeight,
       this.running,
-      this.tick);
+      this.tick,
+      );
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -37,57 +38,85 @@ class StaticDanmakuPainter extends CustomPainter {
       item.xPosition = (size.width - item.width) / 2;
       // 如果 Paragraph 没有缓存，则创建并缓存它
       item.paragraph ??= Utils.generateParagraph(
-          item.content, size.width, fontSize, fontWeight);
+        item.content,
+        size.width,
+        fontSize,
+        fontWeight,
+      );
 
       // 黑色部分
       if (showStroke) {
         item.strokeParagraph ??= Utils.generateStrokeParagraph(
-            item.content, size.width, fontSize, fontWeight);
+          item.content,
+          size.width,
+          fontSize,
+          fontWeight,
+        );
 
         canvas.drawParagraph(
-            item.strokeParagraph!, Offset(item.xPosition, item.yPosition));
+          item.strokeParagraph!,
+          Offset(item.xPosition, item.yPosition),
+        );
       }
 
       if (item.content.selfSend) {
         canvas.drawRect(
-            Offset(item.xPosition, item.yPosition).translate(-2, 2) &
-                (Size(item.width, item.height) + const Offset(4, 0)),
-            selfSendPaint);
+          Offset(item.xPosition, item.yPosition).translate(-2, 2) &
+          (Size(item.width, item.height) + const Offset(4, 0)),
+          selfSendPaint,
+        );
       }
       // 白色部分
       canvas.drawParagraph(
-          item.paragraph!, Offset(item.xPosition, item.yPosition));
+        item.paragraph!,
+        Offset(item.xPosition, item.yPosition),
+      );
     }
     // 绘制底部弹幕 (翻转绘制)
-    for (var item in buttomDanmakuItems) {
+    for (var item in bottomDanmakuItems) {
       item.xPosition = (size.width - item.width) / 2;
       // 如果 Paragraph 没有缓存，则创建并缓存它
       item.paragraph ??= Utils.generateParagraph(
-          item.content, size.width, fontSize, fontWeight);
+        item.content,
+        size.width,
+        fontSize,
+        fontWeight,
+      );
 
       // 黑色部分
       if (showStroke) {
         item.strokeParagraph ??= Utils.generateStrokeParagraph(
-            item.content, size.width, fontSize, fontWeight);
+          item.content,
+          size.width,
+          fontSize,
+          fontWeight,
+        );
 
         canvas.drawParagraph(
-            item.strokeParagraph!,
-            Offset(item.xPosition,
-                (size.height - item.yPosition - danmakuHeight)));
+          item.strokeParagraph!,
+          Offset(
+            item.xPosition,
+            (size.height - item.yPosition - danmakuHeight),
+          ),
+        );
       }
 
       if (item.content.selfSend) {
         canvas.drawRect(
-            Offset(item.xPosition,
-                        (size.height - item.yPosition - danmakuHeight))
-                    .translate(-2, 2) &
-                (Size(item.width, item.height) + const Offset(4, 0)),
-            selfSendPaint);
+          Offset(
+            item.xPosition,
+            (size.height - item.yPosition - danmakuHeight),
+          ).translate(-2, 2) &
+          (Size(item.width, item.height) + const Offset(4, 0)),
+          selfSendPaint,
+        );
       }
 
       // 白色部分
-      canvas.drawParagraph(item.paragraph!,
-          Offset(item.xPosition, size.height - item.yPosition - danmakuHeight));
+      canvas.drawParagraph(
+        item.paragraph!,
+        Offset(item.xPosition, size.height - item.yPosition - danmakuHeight),
+      );
     }
   }
 

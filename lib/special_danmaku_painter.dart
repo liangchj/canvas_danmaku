@@ -1,9 +1,10 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
-import 'package:canvas_danmaku/models/danmaku_content_item.dart';
-import 'package:canvas_danmaku/models/danmaku_item.dart';
 import 'package:flutter/material.dart';
+
+import 'models/danmaku_content_item.dart';
+import 'models/danmaku_item.dart';
 
 class SpecialDanmakuPainter extends CustomPainter {
   final double progress;
@@ -15,14 +16,14 @@ class SpecialDanmakuPainter extends CustomPainter {
   final int batchThreshold;
 
   SpecialDanmakuPainter(
-    this.progress,
-    this.specialDanmakuItems,
-    this.fontSize,
-    this.fontWeight,
-    this.running,
-    this.tick, {
-    this.batchThreshold = 10, // 默认值为10，可以自行调整
-  });
+      this.progress,
+      this.specialDanmakuItems,
+      this.fontSize,
+      this.fontWeight,
+      this.running,
+      this.tick, {
+        this.batchThreshold = 10, // 默认值为10，可以自行调整
+      });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -34,7 +35,8 @@ class SpecialDanmakuPainter extends CustomPainter {
       pictureCanvas = Canvas(pictureRecorder);
     }
     for (final item in specialDanmakuItems) {
-      final elapsed = tick - item.creationTime;
+      if (item.content.time == null) continue;
+      final elapsed = tick - item.content.time!;
       final content = item.content as SpecialDanmakuContentItem;
       if (elapsed >= 0 && elapsed < content.duration) {
         _paintSpecialDanmaku(pictureCanvas, content, size, elapsed);
@@ -46,12 +48,18 @@ class SpecialDanmakuPainter extends CustomPainter {
   }
 
   void _paintSpecialDanmaku(
-      Canvas canvas, SpecialDanmakuContentItem item, Size size, int elapsed) {
+      Canvas canvas,
+      SpecialDanmakuContentItem item,
+      Size size,
+      int elapsed,
+      ) {
     // 透明度动画
-    late final alpha = item.alphaTween?.transform(elapsed / item.duration) ??
-        item.color.opacity;
-    final color =
-        item.alphaTween == null ? item.color : item.color.withOpacity(alpha);
+    late final alpha =
+        item.alphaTween?.transform(elapsed / item.duration) ??
+            item.color.opacity;
+    final color = item.alphaTween == null
+        ? item.color
+        : item.color.withOpacity(alpha);
     // 文本
     if (color != item.painterCache?.text?.style?.color) {
       item.painterCache!.text = TextSpan(
@@ -73,8 +81,12 @@ class SpecialDanmakuPainter extends CustomPainter {
     // else 位移动画
     late double dx, dy;
     if (elapsed > item.translationStartDelay) {
-      late double translateProgress = item.easingType.transform(min(1.0,
-          (elapsed - item.translationStartDelay) / item.translationDuration));
+      late double translateProgress = item.easingType.transform(
+        min(
+          1.0,
+          (elapsed - item.translationStartDelay) / item.translationDuration,
+        ),
+      );
 
       double getOffset(Tween<double> tween) => tween is ConstantTween
           ? tween.begin!

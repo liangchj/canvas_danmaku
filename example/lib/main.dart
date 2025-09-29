@@ -2,8 +2,8 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'package:flutter/material.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
+import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
 
@@ -17,10 +17,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'CanvasDanmaku Demo',
-      home: HomePage(),
-    );
+    return const MaterialApp(title: 'CanvasDanmaku Demo', home: HomePage());
   }
 }
 
@@ -73,9 +70,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('CanvasDanmaku Demo'),
-      ),
+      appBar: AppBar(title: const Text('CanvasDanmaku Demo')),
       body: Column(
         children: [
           Wrap(
@@ -86,8 +81,10 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {
                   _controller.addDanmaku(
                     DanmakuContentItem(
-                        "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度",
-                        color: getRandomColor()),
+                      "这是一条超长弹幕ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789这是一条超长的弹幕，这条弹幕会超出屏幕宽度",
+                      color: getRandomColor(),
+                      selfSend: true,
+                    ),
                   );
                 },
               ),
@@ -96,8 +93,12 @@ class _HomePageState extends State<HomePage> {
                 tooltip: 'Add Top',
                 onPressed: () {
                   _controller.addDanmaku(
-                    DanmakuContentItem("这是一条顶部弹幕",
-                        color: getRandomColor(), type: DanmakuItemType.top),
+                    DanmakuContentItem(
+                      "这是一条顶部弹幕",
+                      color: getRandomColor(),
+                      type: DanmakuItemType.top,
+                      selfSend: true,
+                    ),
                   );
                 },
               ),
@@ -106,8 +107,12 @@ class _HomePageState extends State<HomePage> {
                 tooltip: 'Add Bottom',
                 onPressed: () {
                   _controller.addDanmaku(
-                    DanmakuContentItem("这是一条底部弹幕",
-                        color: getRandomColor(), type: DanmakuItemType.bottom),
+                    DanmakuContentItem(
+                      "这是一条底部弹幕",
+                      color: getRandomColor(),
+                      type: DanmakuItemType.bottom,
+                      selfSend: true,
+                    ),
                   );
                 },
               ),
@@ -149,22 +154,27 @@ class _HomePageState extends State<HomePage> {
                 tooltip: 'Add Special Star',
                 onPressed: () {
                   _controller.addDanmaku(
-                      SpecialDanmakuContentItem.fromList(getRandomColor(), 44, [
-                    "0.939",
-                    "0.083",
-                    "1-1",
-                    "6",
-                    "☆——————\n" * 14,
-                    "342",
-                    "0",
-                    "0.002",
-                    "0.271",
-                    500,
-                    0,
-                    1,
-                    "SimHei",
-                    1
-                  ]));
+                    SpecialDanmakuContentItem.fromList(
+                      getRandomColor(),
+                      44,
+                      [
+                        "0.939",
+                        "0.083",
+                        "1-1",
+                        "6",
+                        "☆——————\n" * 14,
+                        "342",
+                        "0",
+                        "0.002",
+                        "0.271",
+                        500,
+                        0,
+                        1,
+                        "SimHei",
+                        1,
+                      ],
+                    ),
+                  );
                 },
               ),
               IconButton(
@@ -176,13 +186,23 @@ class _HomePageState extends State<HomePage> {
                   final dan = danmaku.last as List;
                   final mu = danmaku.first as List;
                   for (var item in dan) {
-                    _controller.addDanmaku(SpecialDanmakuContentItem.fromList(
-                        Colors.orange, 16, item));
+                    _controller.addDanmaku(
+                      SpecialDanmakuContentItem.fromList(
+                        Colors.orange,
+                        16,
+                        item,
+                      ),
+                    );
                   }
                   await Future.delayed(const Duration(seconds: 2));
                   for (var item in mu) {
-                    _controller.addDanmaku(SpecialDanmakuContentItem.fromList(
-                        Colors.orange, 16, item));
+                    _controller.addDanmaku(
+                      SpecialDanmakuContentItem.fromList(
+                        Colors.orange,
+                        16,
+                        item,
+                      ),
+                    );
                   }
                 },
               ),
@@ -191,10 +211,12 @@ class _HomePageState extends State<HomePage> {
                 tooltip: 'Add Self',
                 onPressed: () {
                   _controller.addDanmaku(
-                    DanmakuContentItem("这是一条自己发的弹幕",
-                        color: getRandomColor(),
-                        type: DanmakuItemType.scroll,
-                        selfSend: true),
+                    DanmakuContentItem(
+                      "这是一条自己发的弹幕",
+                      color: getRandomColor(),
+                      type: DanmakuItemType.scroll,
+                      selfSend: true,
+                    ),
                   );
                 },
               ),
@@ -218,17 +240,47 @@ class _HomePageState extends State<HomePage> {
                 tooltip: 'Play Resume',
               ),
               IconButton(
-                icon: Icon(_showStroke
-                    ? Icons.font_download
-                    : Icons.font_download_rounded),
+                icon: Icon(
+                  _showStroke
+                      ? Icons.font_download
+                      : Icons.font_download_rounded,
+                ),
                 onPressed: () {
                   _controller.updateOption(
-                      _controller.option.copyWith(showStroke: !_showStroke));
+                    _controller.option.copyWith(showStroke: !_showStroke),
+                  );
                   setState(() {
                     _showStroke = !_showStroke;
                   });
                 },
                 tooltip: 'Stroke',
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () {
+                  _controller.updateOption(_controller.option.copyWith(
+                      adjustMillisecond:
+                          _controller.option.adjustMillisecond + 500));
+                },
+                tooltip: '时间增加0.5秒',
+              ),
+              IconButton(
+                icon: const Icon(Icons.remove),
+                onPressed: () {
+                  _controller.updateOption(_controller.option.copyWith(
+                      adjustMillisecond:
+                          _controller.option.adjustMillisecond - 500));
+                },
+                tooltip: '时间减少0.5秒',
+              ),
+              IconButton(
+                icon: const Icon(Icons.lock_reset_rounded),
+                onPressed: () {
+                  print("重置前：${_controller.time}");
+                  _controller.reset();
+                  print("重置后：${_controller.time}");
+                },
+                tooltip: '重置',
               ),
               IconButton(
                 icon: const Icon(Icons.clear),
@@ -240,27 +292,28 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           Expanded(
-              child: Container(
-            color: Colors.grey,
-            child: DanmakuScreen(
-              key: _danmuKey,
-              createdController: (DanmakuController e) {
-                _controller = e;
-              },
-              option: DanmakuOption(
-                opacity: _opacity,
-                fontSize: _fontSize,
-                fontWeight: _fontWeight,
-                duration: _duration.toDouble(),
-                showStroke: _showStroke,
-                massiveMode: _massiveMode,
-                hideScroll: _hideScroll,
-                hideTop: _hideTop,
-                hideBottom: _hideBottom,
-                safeArea: _safeArea,
+            child: Container(
+              color: Colors.grey,
+              child: DanmakuScreen(
+                key: _danmuKey,
+                createdController: (DanmakuController e) {
+                  _controller = e;
+                },
+                option: DanmakuOption(
+                  opacity: _opacity,
+                  fontSize: _fontSize,
+                  fontWeight: _fontWeight,
+                  duration: _duration.toDouble(),
+                  showStroke: _showStroke,
+                  massiveMode: _massiveMode,
+                  hideScroll: _hideScroll,
+                  hideTop: _hideTop,
+                  hideBottom: _hideBottom,
+                  safeArea: _safeArea,
+                ),
               ),
             ),
-          )),
+          ),
         ],
       ),
       endDrawer: Drawer(
@@ -278,8 +331,9 @@ class _HomePageState extends State<HomePage> {
                   setState(() {
                     _opacity = e;
                   });
-                  _controller
-                      .updateOption(_controller.option.copyWith(opacity: e));
+                  _controller.updateOption(
+                    _controller.option.copyWith(opacity: e),
+                  );
                 },
               ),
               Text("FontSize : $_fontSize"),
@@ -292,8 +346,9 @@ class _HomePageState extends State<HomePage> {
                   setState(() {
                     _fontSize = e;
                   });
-                  _controller
-                      .updateOption(_controller.option.copyWith(fontSize: e));
+                  _controller.updateOption(
+                    _controller.option.copyWith(fontSize: e),
+                  );
                 },
               ),
               Text("Duration : $_duration"),
@@ -306,30 +361,35 @@ class _HomePageState extends State<HomePage> {
                   setState(() {
                     _duration = e.toInt();
                   });
-                  _controller
-                      .updateOption(_controller.option.copyWith(duration: e));
+                  _controller.updateOption(
+                    _controller.option.copyWith(duration: e),
+                  );
                 },
               ),
               SwitchListTile(
-                  title: const Text('MassiveMode'),
-                  value: _massiveMode,
-                  onChanged: (e) {
-                    setState(() {
-                      _massiveMode = e;
-                    });
-                    _controller.updateOption(
-                        _controller.option.copyWith(massiveMode: e));
-                  }),
+                title: const Text('MassiveMode'),
+                value: _massiveMode,
+                onChanged: (e) {
+                  setState(() {
+                    _massiveMode = e;
+                  });
+                  _controller.updateOption(
+                    _controller.option.copyWith(massiveMode: e),
+                  );
+                },
+              ),
               SwitchListTile(
-                  title: const Text('SafeArea'),
-                  value: _safeArea,
-                  onChanged: (e) {
-                    setState(() {
-                      _safeArea = e;
-                    });
-                    _controller
-                        .updateOption(_controller.option.copyWith(safeArea: e));
-                  })
+                title: const Text('SafeArea'),
+                value: _safeArea,
+                onChanged: (e) {
+                  setState(() {
+                    _safeArea = e;
+                  });
+                  _controller.updateOption(
+                    _controller.option.copyWith(safeArea: e),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -341,19 +401,15 @@ class _HomePageState extends State<HomePage> {
   int sec = 0;
   void startPlay() async {
     String data = await rootBundle.loadString('assets/132590001.json');
-    List<DanmakuContentItem> items = [];
     var jsonMap = json.decode(data);
     for (var item in jsonMap['comments']) {
-      items.add(DanmakuContentItem(
-        item['m'],
-        color: Colors.white,
-      ));
+      var pArr = (item["p"] ?? "").toString().split(",");
+      double? time = double.tryParse(pArr[0]);
+      if (time == null) continue;
+      _controller.addDanmaku(DanmakuContentItem(item['m'],
+          time: (time * 1000).floor(), color: Colors.white));
     }
-    timer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!_controller.running) return;
-      _controller.addDanmaku(items[sec]);
-      sec++;
-    });
+    _controller.start(0);
   }
 
   // 生成随机颜色
@@ -378,8 +434,10 @@ class _HomePageState extends State<HomePage> {
         begin: _random.nextDouble(),
         end: _random.nextDouble(),
       ),
-      alphaTween:
-          Tween<double>(begin: _random.nextDouble(), end: _random.nextDouble()),
+      alphaTween: Tween<double>(
+        begin: _random.nextDouble(),
+        end: _random.nextDouble(),
+      ),
       matrix: Matrix4.identity()
         ..rotateZ(_random.nextDouble() * pi)
         ..rotateY(_random.nextDouble() * pi),
