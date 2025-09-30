@@ -1,5 +1,6 @@
 import 'models/danmaku_option.dart';
 import '/models/danmaku_content_item.dart';
+import 'parser/base_danmaku_parser.dart';
 
 class DanmakuController {
   final Function(DanmakuContentItem) onAddDanmaku;
@@ -11,6 +12,7 @@ class DanmakuController {
   final Function onUpdateStartTime;
   final Function onTime;
   final Function(bool) onReset;
+  final Function(BaseDanmakuParser, String) onParseDanmaku;
   DanmakuController({
     required this.onAddDanmaku,
     required this.onUpdateOption,
@@ -21,6 +23,7 @@ class DanmakuController {
     required this.onUpdateStartTime,
     required this.onTime,
     required this.onReset,
+    required this.onParseDanmaku,
   });
 
   bool _running = true;
@@ -80,5 +83,10 @@ class DanmakuController {
   /// 重置
   void reset({bool stop = true}) {
     onReset.call(stop);
+  }
+
+  /// 解析弹幕
+  Future<void> parseDanmaku(BaseDanmakuParser parser, String path) async {
+    await onParseDanmaku.call(parser, path);
   }
 }

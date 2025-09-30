@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'models/danmaku_item.dart';
+import 'parser/base_danmaku_parser.dart';
 import 'scroll_danmaku_painter.dart';
 import 'special_danmaku_painter.dart';
 import 'static_danmaku_painter.dart';
@@ -96,6 +97,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       onUpdateStartTime: updateStartTime,
       onTime: () => _tick,
       onReset: reset,
+      onParseDanmaku: parseDanmaku,
     );
     _controller.option = _option;
     widget.createdController.call(_controller);
@@ -415,6 +417,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     if (option.hideBottom && !_option.hideBottom) {
       _bottomDanmakuItems.clear();
     }
+    if (option.hideSpecial && !_option.hideSpecial) {
+      _specialDanmakuItems.clear();
+    }
 
     if (option.adjustMillisecond != _option.adjustMillisecond) {
       needTimeAdjustment = true;
@@ -505,22 +510,15 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     final staticDuration = _option.duration * 1000;
     final currentTick = _tick;
 
-    // 统一移除过期和未来的弹幕
-    isExpiredOrFuture(DanmakuItem item) {
-      final isExpired = item.content is SpecialDanmakuContentItem
-          ? (currentTick - item.content.time!) >=
-              (item.content as SpecialDanmakuContentItem).duration
-          : (currentTick - item.content.time!) >= staticDuration;
-
-      final isFuture = item.content.time! > currentTick;
-
-      return isExpired || isFuture;
+    // 只需要移除未来的弹幕（时间回退时）
+    bool isFuture(DanmakuItem item) {
+      return item.content.time! > currentTick;
     }
 
-    _scrollDanmakuItems.removeWhere(isExpiredOrFuture);
-    _topDanmakuItems.removeWhere(isExpiredOrFuture);
-    _bottomDanmakuItems.removeWhere(isExpiredOrFuture);
-    _specialDanmakuItems.removeWhere(isExpiredOrFuture);
+    _scrollDanmakuItems.removeWhere(isFuture);
+    _topDanmakuItems.removeWhere(isFuture);
+    _bottomDanmakuItems.removeWhere(isFuture);
+    _specialDanmakuItems.removeWhere(isFuture);
     setState(() {});
 
     // 重新启动动画控制器（如果需要）
@@ -658,6 +656,12 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         });
       }
     }
+  }
+
+  /// 解析弹幕文件
+  Future<void> parseDanmaku(BaseDanmakuParser parser, String path) async {
+    await parser.parser(
+        path: path, groupedDanmakus: _groupedDanmakus, danmakuOption: _option);
   }
 
   @override

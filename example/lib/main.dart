@@ -67,6 +67,8 @@ class _HomePageState extends State<HomePage> {
   /// 为字幕预留空间
   bool _safeArea = true;
 
+  BaseDanmakuParser? _danmakuParser;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -400,7 +402,7 @@ class _HomePageState extends State<HomePage> {
   Timer? timer;
   int sec = 0;
   void startPlay() async {
-    String data = await rootBundle.loadString('assets/132590001.json');
+    /*String data = await rootBundle.loadString('assets/132590001.json');
     var jsonMap = json.decode(data);
     for (var item in jsonMap['comments']) {
       var pArr = (item["p"] ?? "").toString().split(",");
@@ -408,8 +410,32 @@ class _HomePageState extends State<HomePage> {
       if (time == null) continue;
       _controller.addDanmaku(DanmakuContentItem(item['m'],
           time: (time * 1000).floor(), color: Colors.white));
-    }
-    _controller.start(0);
+    }*/
+    /*_controller.updateOption(
+      _controller.option.copyWith(
+        hideBottom: true,
+        hideScroll: true,
+        hideTop: true,
+        hideSpecial: false,
+      ),
+    );*/
+    _danmakuParser = BiliDanmakuParser(
+        options: BiliDanmakuParseOptions(
+      parentTag: "i",
+      contentTag: "d",
+      attrName: "p",
+      splitChar: ",",
+      fromAssets: true,
+    ));
+    _danmakuParser!.stateStream.listen((state) {
+      print("解析状态：${state.status}, ${state.progress}");
+      if (state.status == ParserStatus.completed) {
+        _controller.start(0);
+      }
+    });
+    _controller.parseDanmaku(_danmakuParser!, 'assets/1.xml');
+
+    // _controller.start(0);
   }
 
   // 生成随机颜色
@@ -451,6 +477,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    _danmakuParser?.dispose();
     timer?.cancel();
     super.dispose();
   }
