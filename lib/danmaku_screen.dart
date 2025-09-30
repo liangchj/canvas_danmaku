@@ -455,7 +455,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         }
       }
     }
-    // 处理时间调整
+    /// 处理时间调整
     if (needTimeAdjustment) {
       _adjustDanmakusForTimeChange();
     }
@@ -507,10 +507,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   /// 当时间发生调整时，重新处理弹幕显示
   void _adjustDanmakusForTimeChange() {
-    final staticDuration = _option.duration * 1000;
     final currentTick = _tick;
 
-    // 只需要移除未来的弹幕（时间回退时）
+    // 移除还未进入的弹幕（时间回退时）
     bool isFuture(DanmakuItem item) {
       return item.content.time! > currentTick;
     }

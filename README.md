@@ -19,7 +19,8 @@ and the Flutter guide for
 
 ``` yaml
 dependencies: 
-  canvas_danmaku: ^0.2.7
+  git:
+    url: https://github.com/liangchj/canvas_danmaku.git
 ```
 
 Example:
