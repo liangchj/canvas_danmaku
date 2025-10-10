@@ -81,6 +81,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   /// 运行状态
   bool _running = true;
 
+  bool _started = false;
+
   @override
   void initState() {
     super.initState();
@@ -98,6 +100,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       onTime: () => _tick,
       onReset: reset,
       onParseDanmaku: parseDanmaku,
+      onStarted: () => _started,
+      onDanmakuList: () => _groupedDanmakus,
     );
     _controller.option = _option;
     widget.createdController.call(_controller);
@@ -356,6 +360,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     setState(() {
       _running = true;
       _startTime = time;
+      _started = true;
     });
     _animationController.repeat();
     // 启动计时器
@@ -495,6 +500,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     if (!mounted) return;
     _stopwatch.stop();
     setState(() {
+      _started = false;
       _groupedDanmakus.clear();
       _scrollDanmakuItems.clear();
       _topDanmakuItems.clear();

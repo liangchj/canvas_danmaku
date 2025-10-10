@@ -6,13 +6,15 @@ class DanmakuController {
   final Function(DanmakuContentItem) onAddDanmaku;
   final Function(DanmakuOption) onUpdateOption;
   final Function(int) onStart;
-  final Function onPause;
-  final Function onResume;
-  final Function onClear;
-  final Function onUpdateStartTime;
-  final Function onTime;
+  final Function() onPause;
+  final Function() onResume;
+  final Function() onClear;
+  final Function(int) onUpdateStartTime;
+  final Function() onTime;
   final Function(bool) onReset;
   final Function(BaseDanmakuParser, String) onParseDanmaku;
+  final bool Function() onStarted;
+  final Map<int, List<DanmakuContentItem>> Function() onDanmakuList;
   DanmakuController({
     required this.onAddDanmaku,
     required this.onUpdateOption,
@@ -24,6 +26,8 @@ class DanmakuController {
     required this.onTime,
     required this.onReset,
     required this.onParseDanmaku,
+    required this.onStarted,
+    required this.onDanmakuList,
   });
 
   bool _running = true;
@@ -88,5 +92,13 @@ class DanmakuController {
   /// 解析弹幕
   Future<void> parseDanmaku(BaseDanmakuParser parser, String path) async {
     await onParseDanmaku.call(parser, path);
+  }
+
+  bool started() {
+    return onStarted.call();
+  }
+
+  Map<int, List<DanmakuContentItem>> danmakuList() {
+    return onDanmakuList.call();
   }
 }
