@@ -460,6 +460,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         }
       }
     }
+
     /// 处理时间调整
     if (needTimeAdjustment) {
       _adjustDanmakusForTimeChange();
@@ -488,8 +489,9 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     int updateMillisecond =
         time - _stopwatch.elapsedMilliseconds - _option.adjustMillisecond;
     if (updateMillisecond != _startTime) {
-      _startTime = updateMillisecond;
-      setState(() {});
+      setState(() {
+        _startTime = updateMillisecond;
+      });
       // 调整时间后需要重新处理弹幕显示
       _adjustDanmakusForTimeChange();
     }
@@ -625,27 +627,25 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   }
 
   Future<void> _removeExpiredDanmakus() async {
-    final staticDuration = _option.duration * 1000;
-
     while (_running && mounted) {
       await Future.delayed(const Duration(milliseconds: 100));
       // 移除屏幕外滚动弹幕
       _scrollDanmakuItems.removeWhere(
-        (item) => (_tick - item.content.time!) >= staticDuration,
+        (item) => (_tick - item.content.time!) >= _option.duration * 1000,
       );
       // 移除顶部弹幕
       _topDanmakuItems.removeWhere(
-        (item) => (_tick - item.content.time!) >= staticDuration,
+        (item) => (_tick - item.content.time!) >= _option.duration * 1000,
       );
       // 移除底部弹幕
       _bottomDanmakuItems.removeWhere(
-        (item) => (_tick - item.content.time!) >= staticDuration,
+        (item) => (_tick - item.content.time!) >= _option.duration * 1000,
       );
       // 移除高级弹幕
       _specialDanmakuItems.removeWhere(
         (item) =>
             (_tick - item.content.time!) >=
-            (item.content as SpecialDanmakuContentItem).duration,
+            (item.content as SpecialDanmakuContentItem).duration * 1000,
       );
       // 暂停动画
       if (_scrollDanmakuItems.isEmpty &&
