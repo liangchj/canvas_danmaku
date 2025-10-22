@@ -216,6 +216,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         ),
         textDirection: TextDirection.ltr,
       )..layout();
+
       final danmakuWidth = textPainter.width;
       final danmakuHeight = textPainter.height;
 
@@ -517,22 +518,25 @@ class _DanmakuScreenState extends State<DanmakuScreen>
   void _adjustDanmakusForTimeChange() {
     final currentTick = _tick;
 
-    // 移除还未进入的弹幕（时间回退时）
-    bool isFuture(DanmakuItem item) {
-      return item.content.time! > currentTick;
+    // 移除还未进入的弹幕（时间回退时）和过期弹幕
+    bool isFutureOrExpired(DanmakuItem item) {
+      return item.content.time! > currentTick ||
+          (_tick - item.content.time!) >= _option.duration * 1000;
     }
 
-    _scrollDanmakuItems.removeWhere(isFuture);
-    _topDanmakuItems.removeWhere(isFuture);
-    _bottomDanmakuItems.removeWhere(isFuture);
-    _specialDanmakuItems.removeWhere(isFuture);
+    // 移除还未进入的弹幕（时间回退时）和过期弹幕
+    bool specialIsFutureOrExpired(DanmakuItem item) {
+      return item.content.time! > currentTick ||
+          (_tick - item.content.time!) >=
+              (item.content as SpecialDanmakuContentItem).duration * 1000;
+    }
+
+    _scrollDanmakuItems.removeWhere(isFutureOrExpired);
+    _topDanmakuItems.removeWhere(isFutureOrExpired);
+    _bottomDanmakuItems.removeWhere(isFutureOrExpired);
+    _specialDanmakuItems.removeWhere(specialIsFutureOrExpired);
+
     setState(() {});
-
-    // 重新启动动画控制器（如果需要）
-    if ((_scrollDanmakuItems.isNotEmpty || _specialDanmakuItems.isNotEmpty) &&
-        !_animationController.isAnimating) {
-      _animationController.repeat();
-    }
   }
 
   /// 确定滚动弹幕是否可以添加
