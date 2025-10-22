@@ -520,15 +520,33 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
     // 移除还未进入的弹幕（时间回退时）和过期弹幕
     bool isFutureOrExpired(DanmakuItem item) {
-      return item.content.time! > currentTick ||
+      // return item.content.time! > currentTick ||
+      //     (_tick - item.content.time!) >= _option.duration * 1000;
+      bool isRemove = item.content.time! > currentTick ||
           (_tick - item.content.time!) >= _option.duration * 1000;
+      if (isRemove) {
+        // 清理 Paragraph 对象
+        item.paragraph = null;
+        item.strokeParagraph = null;
+      }
+      return isRemove;
     }
 
     // 移除还未进入的弹幕（时间回退时）和过期弹幕
     bool specialIsFutureOrExpired(DanmakuItem item) {
-      return item.content.time! > currentTick ||
+      /*return item.content.time! > currentTick ||
+          (_tick - item.content.time!) >=
+              (item.content as SpecialDanmakuContentItem).duration * 1000;*/
+      bool isRemove = item.content.time! > currentTick ||
           (_tick - item.content.time!) >=
               (item.content as SpecialDanmakuContentItem).duration * 1000;
+      if (isRemove) {
+        // 清理 Paragraph 对象
+        (item.content as SpecialDanmakuContentItem).painterCache = null;
+        item.paragraph = null;
+        item.strokeParagraph = null;
+      }
+      return isRemove;
     }
 
     _scrollDanmakuItems.removeWhere(isFutureOrExpired);
@@ -604,7 +622,11 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     _stopwatch.stop();
   }
 
+  // 防止重复启动处理循环
+  bool _processingDanmakus = false;
   Future<void> _processDanmakus() async {
+    if (_processingDanmakus) return;
+    _processingDanmakus = true;
     int lastProcessedGroup = -1;
 
     while (_running && mounted) {
@@ -626,31 +648,59 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       }
 
       // 继续处理过期弹幕
-      _removeExpiredDanmakus();
-    }
-  }
-
-  Future<void> _removeExpiredDanmakus() async {
-    while (_running && mounted) {
-      await Future.delayed(const Duration(milliseconds: 100));
       // 移除屏幕外滚动弹幕
-      _scrollDanmakuItems.removeWhere(
-        (item) => (_tick - item.content.time!) >= _option.duration * 1000,
-      );
+      _scrollDanmakuItems.removeWhere((item) {
+        bool shouldRemove =
+            (_tick - item.content.time!) >= _option.duration * 1000;
+        if (shouldRemove) {
+          // 清理 Paragraph 对象
+          item.paragraph = null;
+          item.strokeParagraph = null;
+        }
+        return shouldRemove;
+      });
       // 移除顶部弹幕
       _topDanmakuItems.removeWhere(
-        (item) => (_tick - item.content.time!) >= _option.duration * 1000,
-      );
+          // (item) => (_tick - item.content.time!) >= _option.duration * 1000,
+          (item) {
+        bool shouldRemove =
+            (_tick - item.content.time!) >= _option.duration * 1000;
+        if (shouldRemove) {
+          // 清理 Paragraph 对象
+          item.paragraph = null;
+          item.strokeParagraph = null;
+        }
+        return shouldRemove;
+      });
       // 移除底部弹幕
       _bottomDanmakuItems.removeWhere(
-        (item) => (_tick - item.content.time!) >= _option.duration * 1000,
-      );
+          // (item) => (_tick - item.content.time!) >= _option.duration * 1000,
+          (item) {
+        bool shouldRemove =
+            (_tick - item.content.time!) >= _option.duration * 1000;
+        if (shouldRemove) {
+          // 清理 Paragraph 对象
+          item.paragraph = null;
+          item.strokeParagraph = null;
+        }
+        return shouldRemove;
+      });
       // 移除高级弹幕
       _specialDanmakuItems.removeWhere(
-        (item) =>
-            (_tick - item.content.time!) >=
-            (item.content as SpecialDanmakuContentItem).duration * 1000,
-      );
+          // (item) =>
+          //     (_tick - item.content.time!) >=
+          //     (item.content as SpecialDanmakuContentItem).duration * 1000,
+          (item) {
+        bool shouldRemove = (_tick - item.content.time!) >=
+            (item.content as SpecialDanmakuContentItem).duration * 1000;
+        if (shouldRemove) {
+          // 清理 Paragraph 对象
+          (item.content as SpecialDanmakuContentItem).painterCache = null;
+          item.paragraph = null;
+          item.strokeParagraph = null;
+        }
+        return shouldRemove;
+      });
       // 暂停动画
       if (_scrollDanmakuItems.isEmpty &&
           _specialDanmakuItems.isEmpty &&
@@ -665,6 +715,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         });
       }
     }
+    _processingDanmakus = false;
   }
 
   /// 解析弹幕文件
